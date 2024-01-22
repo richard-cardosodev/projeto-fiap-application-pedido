@@ -82,11 +82,7 @@ public class Pedido {
 
 	private void validaPedido() throws InvalidStatusException, NoItensException {
 
-		if ((codigo == null) || (cliente == null) || (dataCriacao == null)) {
-			throw new NoItensException("Status Nulo");
-		}
-
-		if ((valorTotal == null) || (valorTotal <= 0)) {
+		if ((codigo == null) || (dataCriacao == null)) {
 			throw new NoItensException("Status Nulo");
 		}
 
