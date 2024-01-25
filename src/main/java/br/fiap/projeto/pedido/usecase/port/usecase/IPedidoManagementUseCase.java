@@ -21,6 +21,6 @@ public interface IPedidoManagementUseCase {
     Pedido reduzirQuantidade(UUID codigoPedido, UUID codigoProduto)
             throws ItemNotFoundException, InvalidOperacaoProdutoException, InvalidStatusException, NoItensException;
 
-    void removerProduto(UUID codigoPedido, UUID codigoProduto)
+    Pedido removerProduto(UUID codigoPedido, UUID codigoProduto)
             throws InvalidOperacaoProdutoException, ItemNotFoundException, InvalidStatusException, NoItensException;
 }
