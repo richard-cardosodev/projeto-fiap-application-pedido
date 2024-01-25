@@ -10,6 +10,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -31,6 +32,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class PedidoIntegrationTest {
+
+    @Value("${externalport}")
+    private int port;
+
     @Autowired
     private MockMvc mvc;
     private WireMockServer wireMockServer;
@@ -66,11 +71,11 @@ public class PedidoIntegrationTest {
     //////////////////////////////////////////////////////////////////////////////
     private void wireMockServerUp(){
         // Configurar e iniciar o servidor WireMock antes de cada cenário
-        wireMockServer = new WireMockServer(WireMockConfiguration.options().port(8081));
+        wireMockServer = new WireMockServer(WireMockConfiguration.options().port(port));
         wireMockServer.stop();
         wireMockServer.start();
         System.out.println(wireMockServer.baseUrl());
-        configureFor("localhost", 8081);
+        configureFor("localhost", port);
     }
     private void wireMockServerDown(){
         wireMockServer.stop();
