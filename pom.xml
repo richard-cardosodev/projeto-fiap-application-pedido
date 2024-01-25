@@ -15,6 +15,10 @@
 	<description>Projeto de pós-graduação do grupo 2023-Q1-64 - contexto pedido</description>
 	<properties>
 		<java.version>1.8</java.version>
+		<sonar.organization>richard-cardosodev</sonar.organization>
+		<sonar.projectKey>richard-cardosodev_projeto-fiap-application-pedido</sonar.projectKey>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<dependencyManagement>
@@ -233,38 +237,12 @@
 				</executions>
 				<configuration>
 					<excludes>
-						<exclude>br/fiap/projeto/identificacao/external/config/**</exclude>
+						<exclude>br/fiap/projeto/**/external/config/**</exclude>
 						<exclude>br/fiap/projeto/AplicacaoProjetoFiap*</exclude>
-						<exclude>br/fiap/projeto/util/**</exclude>
-						<exclude>br/fiap/projeto/identificacao/adapter/controller/rest/request</exclude>
-						<exclude>br/fiap/projeto/identificacao/adapter/controller/rest/response</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>bdd</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>3.2.5</version>
-						<configuration>
-							<includes combine.self="override">
-								<include>**/CucumberTest.java</include>
-							</includes>
-							<excludes combine.self="override">
-							</excludes>
-							<testFailureIgnore>true</testFailureIgnore>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 </project>
