@@ -15,8 +15,6 @@ public interface IPedidoRepositoryAdapterGateway {
 
     Optional<Pedido> buscaPedido(UUID codigo);
 
-    List<Pedido> buscaTodos();
-
     List<Pedido> buscaPedidosPorStatus(StatusPedido statusPedido);
 
     List<Pedido> buscaPedidorPorStatuses(List<StatusPedido> statuses);

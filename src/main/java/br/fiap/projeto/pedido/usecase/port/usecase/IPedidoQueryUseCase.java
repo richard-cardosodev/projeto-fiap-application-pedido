@@ -7,7 +7,6 @@ import java.util.UUID;
 
 public interface IPedidoQueryUseCase {
     Pedido buscaPedido(UUID codigoPedido);
-    List<Pedido> buscaTodos();
     List<Pedido> buscarTodosRecebido();
     List<Pedido> buscarTodosPagos();
     List<Pedido> buscarTodosEmPreparacao();
