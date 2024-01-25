@@ -291,6 +291,20 @@ public class PedidoIntegrationTest {
     }
 
     @Test
+    public void testeRemoverQuantidadeProdutoComMaisDeUm() throws Exception{
+        testeAumentarQuantidadeProduto();
+
+        wireMockServerUp();
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_DECREASE_PRODUTO + LANCHE_DEFAULT))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+
+    @Test
     public void testeEnviarParaPagamento() throws Exception{
         testeAdicionarProduto();
         wireMockServerUp();
