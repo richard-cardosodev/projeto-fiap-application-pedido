@@ -47,7 +47,9 @@ public class PedidoIntegrationTest {
     private String ENDPOINT_ENVIAR_PAGAMENTO = "/pagar";
     private String ENDPOINT_RECEBE_RETORNO_PAGAMENTO = "/recebe-retorno-pagamento";
     private String ENDPOINT_ATUALIZAR_PAGAMENTO = "/atualizar-pagamento";
+    private String ENDPOINT_PRONTIFICAR = "/prontificar";
     private String ENDPOINT_ENTREGAR = "/entregar";
+    private String ENDPOINT_ENVIAR_COMANDA = "/enviar-comanda";
     private String ENDPOINT_CANCELAR = "/cancelar";
     private String ENDPOINT_BUSCA_CANCELADOS = "/busca-cancelados";
     private String ENDPOINT_BUSCA_EM_PREPARACAO = "/busca-em-preparacao";
@@ -436,6 +438,57 @@ public class PedidoIntegrationTest {
                         .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ATUALIZAR_PAGAMENTO))
                 .andExpect(MockMvcResultMatchers.status()
                         .is4xxClientError())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeEnviarComanda() throws Exception{
+        // Pre condições
+        testeAtualizaPagamentoPago();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+        Pagamento pagamento = createPagamentoPago();
+        wireMockPagamentoBuscarStatusPorPedidoMockUp(pagamento);
+        wireMockComandaCreate();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ENVIAR_COMANDA))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeProntificar() throws Exception{
+        // Pre condições
+        testeEnviarComanda();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .put(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_PRONTIFICAR))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeFinalizar() throws Exception{
+        // Pre condições
+        testeProntificar();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .put(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ENTREGAR))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
         wireMockServerDown();
