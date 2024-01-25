@@ -46,6 +46,7 @@ public class PedidoIntegrationTest {
     private String ENDPOINT_DECREASE_PRODUTO = "/reduzir-qtde-produto/";
     private String ENDPOINT_ENVIAR_PAGAMENTO = "/pagar";
     private String ENDPOINT_RECEBE_RETORNO_PAGAMENTO = "/recebe-retorno-pagamento";
+    private String ENDPOINT_ATUALIZAR_PAGAMENTO = "/atualizar-pagamento";
     private String ENDPOINT_ENTREGAR = "/entregar";
     private String ENDPOINT_CANCELAR = "/cancelar";
     private String ENDPOINT_BUSCA_CANCELADOS = "/busca-cancelados";
@@ -321,6 +322,106 @@ public class PedidoIntegrationTest {
                         .content(jsonEnviado))
                 .andExpect(MockMvcResultMatchers.status()
                         .isNoContent())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeRecebeRetornoPagamentoCancelado() throws Exception{
+        // Pre condições
+        testeEnviarParaPagamento();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+        Pagamento pagamento = createPagamentoCancelado();
+        wireMockPagamentoBuscarStatusPorPedidoMockUp(pagamento);
+        wireMockComandaCreate();
+        // Montagem da requisição
+        String jsonEnviado = convertObjectToJsonString(pagamento);
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .put(ENDPOINT_PEDIDO_BASE + ENDPOINT_RECEBE_RETORNO_PAGAMENTO)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonEnviado))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isNoContent())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeAtualizaPagamentoPago() throws Exception{
+        // Pre condições
+        testeEnviarParaPagamento();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+        Pagamento pagamento = createPagamentoPago();
+        wireMockPagamentoBuscarStatusPorPedidoMockUp(pagamento);
+        wireMockComandaCreate();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ATUALIZAR_PAGAMENTO))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+
+    @Test
+    public void testeAtualizaPagamentoCancelado() throws Exception{
+        // Pre condições
+        testeEnviarParaPagamento();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+        Pagamento pagamento = createPagamentoCancelado();
+        wireMockPagamentoBuscarStatusPorPedidoMockUp(pagamento);
+        wireMockComandaCreate();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ATUALIZAR_PAGAMENTO))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeAtualizaPagamentoFluxoNegativoPedidoNaoExiste() throws Exception{
+        // Pre condições
+        testeEnviarParaPagamento();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+        Pagamento pagamento = createPagamentoCancelado();
+        wireMockPagamentoBuscarStatusPorPedidoMockUp(pagamento);
+        wireMockComandaCreate();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + UUID.randomUUID() + ENDPOINT_ATUALIZAR_PAGAMENTO))
+                .andExpect(MockMvcResultMatchers.status()
+                        .is5xxServerError())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeAtualizaPagamentoFluxoNegativoPedidoStatusIncorreto() throws Exception{
+        // Pre condições
+        testeAtualizaPagamentoPago();
+
+        // Configuracao do wiremock
+        wireMockServerUp();
+        Pagamento pagamento = createPagamentoCancelado();
+        wireMockPagamentoBuscarStatusPorPedidoMockUp(pagamento);
+        wireMockComandaCreate();
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ATUALIZAR_PAGAMENTO))
+                .andExpect(MockMvcResultMatchers.status()
+                        .is4xxClientError())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
         wireMockServerDown();
