@@ -32,6 +32,10 @@ public class PedidoIntegrationTest {
     private String LANCHE_DEFAULT = "28894d3e-5f18-40da-93c7-49440b91f36b";
     private String ENDPOINT_PEDIDO_BASE = "/pedidos/";
     private String ENDPOINT_ADD_PRODUTO = "/adicionar-produto/";
+    private String ENDPOINT_REMOVE_PRODUTO = "/remover-produto/";
+
+    private String ENDPOINT_INCREASE_PRODUTO = "/aumentar-qtde-produto/";
+    private String ENDPOINT_DECREASE_PRODUTO = "/reduzir-qtde-produto/";
     private String ENDPOINT_ENVIAR_PAGAMENTO = "/pagar";
     private String ENDPOINT_BUSCA_CANCELADOS = "/busca-cancelados";
     private String ENDPOINT_BUSCA_EM_PREPARACAO = "/busca-em-preparacao";
@@ -132,7 +136,21 @@ public class PedidoIntegrationTest {
         wireMockServerUp();
         wireMockProdutoMockUp();
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .post(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + "/adicionar-produto/" + LANCHE_DEFAULT))
+                        .post(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_ADD_PRODUTO + LANCHE_DEFAULT))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+    @Test
+    public void testeRemoverProduto() throws Exception{
+        testeAdicionarProduto();
+
+        wireMockServerUp();
+        wireMockProdutoMockUp();
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .delete(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_REMOVE_PRODUTO + LANCHE_DEFAULT))
                 .andExpect(MockMvcResultMatchers.status()
                         .isOk())
                 .andReturn();
@@ -140,6 +158,35 @@ public class PedidoIntegrationTest {
         wireMockServerDown();
     }
 
+    @Test
+    public void testeAumentarQuantidadeProduto() throws Exception{
+        testeAdicionarProduto();
+
+        wireMockServerUp();
+        wireMockProdutoMockUp();
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_INCREASE_PRODUTO + LANCHE_DEFAULT))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
+
+    @Test
+    public void testeRemoverQuantidadeProduto() throws Exception{
+        testeAdicionarProduto();
+
+        wireMockServerUp();
+        //wireMockProdutoMockUp();
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .patch(ENDPOINT_PEDIDO_BASE + CODIGO_PEDIDO + ENDPOINT_DECREASE_PRODUTO + LANCHE_DEFAULT))
+                .andExpect(MockMvcResultMatchers.status()
+                        .isOk())
+                .andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        wireMockServerDown();
+    }
 
     ////////////////////////////////////////
     //  FLUXOS ADICIONAIS
