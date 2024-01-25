@@ -1,13 +1,12 @@
 package br.fiap.projeto.pedido.external.integration.port;
 
 import br.fiap.projeto.pedido.entity.enums.StatusPagamento;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Pagamento {
