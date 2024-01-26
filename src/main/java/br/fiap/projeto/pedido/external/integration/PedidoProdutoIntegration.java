@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.UUID;
 
-@FeignClient(value="pedidoProdutoIntegration", url = "http://${produto.host}/")
+@FeignClient(value="pedidoProdutoIntegration", url = "http://${produto.host:integration.port}/")
 public interface PedidoProdutoIntegration {
     @RequestMapping(method = RequestMethod.GET, value = "produtos/{codigo}")
     public Produto getProduto(@PathVariable("codigo") UUID codigo);
