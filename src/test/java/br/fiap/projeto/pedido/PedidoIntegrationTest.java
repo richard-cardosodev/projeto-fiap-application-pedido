@@ -9,12 +9,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -23,8 +20,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,26 +66,23 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 @AutoConfigureMockMvc
 public class PedidoIntegrationTest {
 
-    @Value("${integration.port}")
-    private int port;
+    private static final int PORT = 9080;
 
     @Autowired
     private MockMvc mvc;
 
-    private WireMockServer wireMockServer = new WireMockServer(WireMockConfiguration.options().port(port));
+    private static final WireMockServer wireMockServer = new WireMockServer(WireMockConfiguration.options().port(PORT));
 
-    @PostConstruct
-    public void init() {
+    @BeforeAll
+    public static void setUp(){
         log.info("Starting wireMock server");
-        wireMockServer = new WireMockServer(WireMockConfiguration.options().port(port));
         wireMockServer.start();
     }
 
-    @PreDestroy
-    public void destroy() {
-        if (wireMockServer != null) {
-            wireMockServer.stop();
-        }
+    @AfterAll
+    private static void tearDown(){
+        log.info("Stopping wireMock server");
+        wireMockServer.stop();
     }
 
     private void wireMockClienteMockUp(){
