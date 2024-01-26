@@ -59,7 +59,6 @@ import static br.fiap.projeto.pedido.util.JsonUtils.stringJsonToMapStringObject;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 @SpringBootTest
@@ -85,7 +84,7 @@ public class PedidoIntegrationTest {
 
     private void wireMockClienteMockUp(){
         String jsonValue = "{\"codigo\": \"" + CLIENTE_DEFAULT + "\"}";
-        stubFor(get(urlEqualTo("/identificacao/clientes/" + CLIENTE_DEFAULT))
+        wireMockServer.stubFor(get(urlEqualTo("/identificacao/clientes/" + CLIENTE_DEFAULT))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(jsonValue)));
@@ -93,7 +92,7 @@ public class PedidoIntegrationTest {
     private void wireMockProdutoMockUp(){
         Produto lanche = createProdutoLanche();
         String jsonValue = createProdutoJsonString(lanche);
-        stubFor(get(urlEqualTo("/produto/produtos/" + LANCHE_DEFAULT))
+        wireMockServer.stubFor(get(urlEqualTo("/produto/produtos/" + LANCHE_DEFAULT))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(jsonValue)));
@@ -102,14 +101,14 @@ public class PedidoIntegrationTest {
         Pagamento pagamento = createPagamentoPendente();
         String jsonValue = createPagamentoJsonString(pagamento);
 
-        stubFor(post(urlEqualTo("/pagamento/pagamento" + ENDPOINT_PAGAMENTO_NOVO ))
+        wireMockServer.stubFor(post(urlEqualTo("/pagamento/pagamento" + ENDPOINT_PAGAMENTO_NOVO ))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(jsonValue)));
     }
     private void wireMockPagamentoBuscarStatusPorPedidoMockUp(Pagamento pagamento){
         String jsonValue = createPagamentoJsonString(pagamento);
-        stubFor(get(urlEqualTo("/pagamento/pagamento" + ENDPOINT_PAGAMENTO_BUSCA_PEDIDO + CODIGO_PEDIDO))
+        wireMockServer.stubFor(get(urlEqualTo("/pagamento/pagamento" + ENDPOINT_PAGAMENTO_BUSCA_PEDIDO + CODIGO_PEDIDO))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(jsonValue)));
@@ -118,7 +117,7 @@ public class PedidoIntegrationTest {
         Comanda comanda = createComanda();
         String jsonValue = createComandaJsonString(comanda);
 
-        stubFor(post(urlEqualTo("/comanda/comandas" ))
+        wireMockServer.stubFor(post(urlEqualTo("/comanda/comandas" ))
                 .willReturn(aResponse().withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(jsonValue)));
