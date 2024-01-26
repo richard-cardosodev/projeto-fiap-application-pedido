@@ -21,10 +21,6 @@ public class PedidoQueryUseCase extends AbstractPedidoUseCase implements IPedido
     }
 
     @Override
-    public List<Pedido> buscaTodos() {
-        return IPedidoRepositoryAdapterGateway.buscaTodos();
-    }
-    @Override
     public List<Pedido> buscarTodosRecebido(){
         return IPedidoRepositoryAdapterGateway.buscaPedidosPorStatus(StatusPedido.RECEBIDO);
     }

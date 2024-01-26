@@ -170,14 +170,15 @@ public class PedidoServiceTest {
 
     @Test
     public void testComparePedidosComMesmaPrioridade() throws InvalidStatusException, NoItensException {
+        LocalDateTime time = LocalDateTime.now();
         Pedido pedido1 = new Pedido(UUID.randomUUID(), null, UUID.randomUUID(), StatusPedido.EM_PREPARACAO, 20d,
-                LocalDateTime.now());
+                time);
         Pedido pedido2 = new Pedido(UUID.randomUUID(), null, UUID.randomUUID(), StatusPedido.EM_PREPARACAO, 20d,
-                LocalDateTime.now());
+                time);
 
         int result = comparator.compare(pedido1, pedido2);
 
-        assertEquals(-1, result);
+        assertEquals(0, result);
     }
 
     @Test

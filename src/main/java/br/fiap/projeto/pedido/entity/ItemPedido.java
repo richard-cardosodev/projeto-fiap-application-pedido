@@ -19,9 +19,6 @@ public class ItemPedido {
 	private String imagem;
 	private Integer tempoPreparoMin;
 
-	public ItemPedido() {
-	}
-
 	public ItemPedido(UUID pedidoCodigo, UUID produtoCodigo, Pedido pedido, Integer quantidade, String produtoNome,
 			String produtoDescricao, Double valorUnitario, CategoriaProduto categoriaProduto, String imagem,
 			Integer tempoPreparoMin) throws NoItensException, InvalidStatusException {
@@ -84,21 +81,6 @@ public class ItemPedido {
 
 	public void reduzirQuantidade() {
 		this.quantidade--;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		ItemPedido that = (ItemPedido) o;
-		return Objects.equals(pedidoCodigo, that.pedidoCodigo) && Objects.equals(produtoCodigo, that.produtoCodigo);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(pedidoCodigo, produtoCodigo);
 	}
 
 	private void validarItemPedido() throws NoItensException, InvalidStatusException {

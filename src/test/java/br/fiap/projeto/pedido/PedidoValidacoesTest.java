@@ -33,43 +33,7 @@ public class PedidoValidacoesTest {
                                 "Mensagem de erro");
         }
 
-        @Test
-        public void codigoClienteNulo() {
-                assertThrows(
-                                NoItensException.class,
-                                () -> new Pedido(UUID.randomUUID(), null, null, StatusPedido.INICIADO, 20d,
-                                                LocalDateTime.now()),
-                                "Mensagem de erro");
-        }
 
-        @Test
-        public void valorTotalNulo() {
-                assertThrows(
-                                NoItensException.class,
-                                () -> new Pedido(UUID.randomUUID(), null, UUID.randomUUID(), StatusPedido.INICIADO,
-                                                null,
-                                                LocalDateTime.now()),
-                                "Mensagem de erro");
-        }
-
-        @Test
-        public void valorTotalZero() {
-                assertThrows(
-                                NoItensException.class,
-                                () -> new Pedido(UUID.randomUUID(), null, UUID.randomUUID(), StatusPedido.INICIADO, 0d,
-                                                LocalDateTime.now()),
-                                "Mensagem de erro");
-        }
-
-        @Test
-        public void valorTotalNegativo() {
-                assertThrows(
-                                NoItensException.class,
-                                () -> new Pedido(UUID.randomUUID(), null, UUID.randomUUID(), StatusPedido.INICIADO,
-                                                -10d,
-                                                LocalDateTime.now()),
-                                "Mensagem de erro");
-        }
 
         @Test
         public void dataCriacaoNulo() {

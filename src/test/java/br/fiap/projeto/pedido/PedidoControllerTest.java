@@ -100,7 +100,8 @@ public class PedidoControllerTest {
     @Test
     public void testRemoverProduto() throws Exception {
         // Configurar o comportamento do mock para o método removerProduto
-        doNothing().when(pedidoManagementUseCase).removerProduto(codigoPedido, codigoProduto);
+        Pedido pedido = new Pedido(/* preencha com os dados necessários */);
+        when(pedidoManagementUseCase.removerProduto(codigoPedido, codigoProduto)).thenReturn(pedido);
 
         controller.removerProduto(codigoPedido, codigoProduto);
 

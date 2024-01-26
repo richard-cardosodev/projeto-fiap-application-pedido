@@ -72,7 +72,7 @@ public class PedidoManagementUseCase extends AbstractPedidoUseCase implements IP
     }
 
     @Override
-    public void removerProduto(UUID codigoPedido, UUID codigoProduto)
+    public Pedido removerProduto(UUID codigoPedido, UUID codigoProduto)
             throws InvalidOperacaoProdutoException, ItemNotFoundException, InvalidStatusException, NoItensException {
         Pedido pedido = this.buscar(codigoPedido);
         ItemPedido itemPedido = this.getItemPedidoByProduto(codigoProduto, pedido.getItens());
@@ -81,7 +81,7 @@ public class PedidoManagementUseCase extends AbstractPedidoUseCase implements IP
         }
         this.atualizaValorTotal(pedido, itemPedido, OperacaoProduto.REMOVER);
         pedido.getItens().remove(itemPedido);
-        IPedidoRepositoryAdapterGateway.salvar(pedido);
+        return IPedidoRepositoryAdapterGateway.salvar(pedido);
     }
 
     @Override
@@ -107,13 +107,12 @@ public class PedidoManagementUseCase extends AbstractPedidoUseCase implements IP
         } else {
             this.atualizaValorTotal(pedido, itemPedido, OperacaoProduto.SUBTRAIR);
             if (itemPedido.getQuantidade() <= 1) {
-                this.removerProduto(codigoPedido, codigoProduto);
+                return this.removerProduto(codigoPedido, codigoProduto);
             } else {
                 itemPedido.reduzirQuantidade();
                 return IPedidoRepositoryAdapterGateway.salvar(pedido);
             }
         }
-        return null;
     }
 
     private void atualizaValorTotal(Pedido pedido, ItemPedido itemPedido, OperacaoProduto operacao)

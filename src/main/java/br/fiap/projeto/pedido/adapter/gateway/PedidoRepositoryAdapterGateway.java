@@ -49,21 +49,6 @@ public class PedidoRepositoryAdapterGateway implements IPedidoRepositoryAdapterG
     }
 
     @Override
-    public List<Pedido> buscaTodos() {
-        List<PedidoEntity> listaPedidoEntity = springPedidoRepository.findAll();
-        return listaPedidoEntity.stream().map(t -> {
-            try {
-                return PedidoMapper.toDomain(t);
-            } catch (InvalidStatusException e) {
-                e.printStackTrace();
-            } catch (NoItensException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
     public List<Pedido> buscaPedidosPorStatus(StatusPedido statusPedido) {
         List<PedidoEntity> listaPedidoEntity = springPedidoRepository.findByStatusEquals(statusPedido);
         return listaPedidoEntity.stream().map(t -> {
