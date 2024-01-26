@@ -8,7 +8,9 @@ import br.fiap.projeto.pedido.util.DomainUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,14 +77,14 @@ public class PedidoIntegrationTest {
 
     private final WireMockServer wireMockServer = new WireMockServer(WireMockConfiguration.options().port(port));;
 
-    @BeforeEach // Configurar e iniciar o servidor WireMock antes de cada cenário
-    public void wireMockServerUp(){
+    @BeforeAll
+    public void setUp(){
         log.info("Starting wireMock server");
         wireMockServer.start();
     }
 
-    @AfterEach // Derrubar o servidor WireMock após cada cenário
-    private void wireMockServerDown(){
+    @AfterAll
+    private void tearDown(){
         log.info("Stopping wireMock server");
         wireMockServer.stop();
     }
