@@ -66,7 +66,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 @AutoConfigureMockMvc
 public class PedidoIntegrationTest {
 
-    @Value("${externalport}")
+    @Value("${integration.port}")
     private int port;
 
     @Autowired
