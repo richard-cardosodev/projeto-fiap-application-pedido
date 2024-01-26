@@ -8,9 +8,7 @@ import br.fiap.projeto.pedido.util.DomainUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,15 +73,15 @@ public class PedidoIntegrationTest {
     @Autowired
     private MockMvc mvc;
 
-    private final WireMockServer wireMockServer = new WireMockServer(WireMockConfiguration.options().port(port));;
+    private final WireMockServer wireMockServer = new WireMockServer(WireMockConfiguration.options().port(port));
 
-    @BeforeAll
+    @BeforeEach
     public void setUp(){
         log.info("Starting wireMock server");
         wireMockServer.start();
     }
 
-    @AfterAll
+    @AfterEach
     private void tearDown(){
         log.info("Stopping wireMock server");
         wireMockServer.stop();
@@ -157,7 +155,6 @@ public class PedidoIntegrationTest {
         Map<String, Object> resultMap = stringJsonToMapStringObject(result.getResponse().getContentAsString());
         CODIGO_PEDIDO = resultMap.get("codigo").toString();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeAdicionarProduto() throws Exception{
@@ -184,7 +181,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
 
     @Test
@@ -197,7 +193,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
 
     @Test
@@ -210,7 +205,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
 
     @Test
@@ -223,7 +217,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
 
     @Test
@@ -236,7 +229,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeRecebeRetornoPagamentoPago() throws Exception{
@@ -258,7 +250,6 @@ public class PedidoIntegrationTest {
                         .isNoContent())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeRecebeRetornoPagamentoCancelado() throws Exception{
@@ -280,7 +271,6 @@ public class PedidoIntegrationTest {
                         .isNoContent())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeAtualizaPagamentoPago() throws Exception{
@@ -298,7 +288,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
 
     @Test
@@ -317,7 +306,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeAtualizaPagamentoFluxoNegativoPedidoNaoExiste() throws Exception{
@@ -335,7 +323,6 @@ public class PedidoIntegrationTest {
                         .is5xxServerError())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeAtualizaPagamentoFluxoNegativoPedidoStatusIncorreto() throws Exception{
@@ -353,7 +340,6 @@ public class PedidoIntegrationTest {
                         .is4xxClientError())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeEnviarComanda() throws Exception{
@@ -371,7 +357,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeProntificar() throws Exception{
@@ -386,7 +371,6 @@ public class PedidoIntegrationTest {
                         .isOk())
                 .andReturn();
         System.out.println(result.getResponse().getContentAsString());
-        wireMockServerDown();
     }
     @Test
     public void testeFinalizar() throws Exception{
