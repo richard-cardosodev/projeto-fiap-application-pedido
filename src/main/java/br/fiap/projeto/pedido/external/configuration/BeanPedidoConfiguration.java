@@ -9,8 +9,11 @@ import br.fiap.projeto.pedido.external.integration.PedidoPagamentoIntegration;
 import br.fiap.projeto.pedido.external.integration.PedidoProdutoIntegration;
 import br.fiap.projeto.pedido.external.repository.postgres.SpringPedidoRepository;
 import br.fiap.projeto.pedido.usecase.*;
+import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
 import br.fiap.projeto.pedido.usecase.port.adaptergateway.*;
+import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.usecase.port.usecase.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,9 +33,11 @@ public class BeanPedidoConfiguration {
     }
     @Bean
     IPedidoWorkFlowUseCase pedidoWorkFlowUseCase(IPedidoRepositoryAdapterGateway pedidoRepositoryAdapterGateway,
-                                                 IPedidoPagamentoIntegrationAdapterGateway pedidoPagamentoIntegrationAdapterGateway){
+                                                 IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT,
+                                                 IJsonConverter jsonConverter){
         return new PedidoWorkFlowUseCase(pedidoRepositoryAdapterGateway,
-                pedidoPagamentoIntegrationAdapterGateway);
+                pedidoQueueAdapterGatewayOUT,
+                jsonConverter);
     }
     @Bean
     IPedidoComandaIntegrationUseCase pedidoComandaIntegrationUseCase(IPedidoComandaIntegrationAdapterGateway pedidoComandaIntegrationAdapterGateway,
@@ -89,5 +94,9 @@ public class BeanPedidoConfiguration {
     @Bean
     IPedidoPagamentoIntegrationAdapterGateway pedidoPagamentoIntegrationAdapterGateway(PedidoPagamentoIntegration pagamentoIntegration){
         return new PedidoPagamentoIntegrationAdapterGateway(pagamentoIntegration);
+    }
+    @Bean
+    IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT(RabbitTemplate rabbitTemplate) {
+        return new PedidoQueueAdapterGatewayOUT(rabbitTemplate);
     }
 }
