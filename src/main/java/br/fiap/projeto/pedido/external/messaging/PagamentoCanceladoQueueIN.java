@@ -35,8 +35,6 @@ public class PagamentoCanceladoQueueIN implements IPagamentoConfirmadoQueueIN {
             Pagamento pagamento = new Pagamento((String) messageMap.get("codigoPedido"), new Date((Long) messageMap.get("dataPagamento")), StatusPagamento.valueOf((String) messageMap.get("status")));
             this.pedidoPagamentoIntegrationRestAdapterController.recebeRetornoPagamento(pagamento);
             logger.info("Processando retorno pagamento cancelado");
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
