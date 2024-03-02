@@ -3,7 +3,6 @@ package br.fiap.projeto.pedido.external.messaging;
 import br.fiap.projeto.pedido.adapter.controller.port.IPedidoPagamentoIntegrationRestAdapterController;
 import br.fiap.projeto.pedido.entity.enums.StatusPagamento;
 import br.fiap.projeto.pedido.external.integration.port.Pagamento;
-import br.fiap.projeto.pedido.usecase.exception.JsonProcessingException;
 import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
 import br.fiap.projeto.pedido.usecase.port.messaging.IPagamentoConfirmadoQueueIN;
 import org.slf4j.Logger;
