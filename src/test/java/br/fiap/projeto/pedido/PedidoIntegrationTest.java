@@ -4,6 +4,11 @@ import br.fiap.projeto.pedido.external.integration.port.Cliente;
 import br.fiap.projeto.pedido.external.integration.port.Comanda;
 import br.fiap.projeto.pedido.external.integration.port.Pagamento;
 import br.fiap.projeto.pedido.external.integration.port.Produto;
+import br.fiap.projeto.pedido.external.utils.JsonConverter;
+import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
+import br.fiap.projeto.pedido.usecase.port.messaging.IPagamentoCanceladoQueueIN;
+import br.fiap.projeto.pedido.usecase.port.messaging.IPagamentoConfirmadoQueueIN;
+import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.util.DomainUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -11,6 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,43 +32,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Map;
 import java.util.UUID;
 
-import static br.fiap.projeto.pedido.util.Constants.CLIENTE_DEFAULT;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_ADD_PRODUTO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_ATUALIZAR_PAGAMENTO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_CANCELADOS;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_EM_PREPARACAO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_ENTREGUES;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_PAGOS;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_PEDIDOS;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_PRONTOS;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_BUSCA_RECEBIDOS;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_DECREASE_PRODUTO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_ENTREGAR;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_ENVIAR_COMANDA;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_ENVIAR_PAGAMENTO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_INCREASE_PRODUTO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_PAGAMENTO_BUSCA_PEDIDO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_PAGAMENTO_NOVO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_PEDIDO_BASE;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_PRONTIFICAR;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_RECEBE_RETORNO_PAGAMENTO;
-import static br.fiap.projeto.pedido.util.Constants.ENDPOINT_REMOVE_PRODUTO;
-import static br.fiap.projeto.pedido.util.Constants.LANCHE_DEFAULT;
-import static br.fiap.projeto.pedido.util.DomainUtils.CODIGO_PEDIDO;
-import static br.fiap.projeto.pedido.util.DomainUtils.createComanda;
-import static br.fiap.projeto.pedido.util.DomainUtils.createPagamentoCancelado;
-import static br.fiap.projeto.pedido.util.DomainUtils.createPagamentoPago;
-import static br.fiap.projeto.pedido.util.DomainUtils.createPagamentoPendente;
-import static br.fiap.projeto.pedido.util.DomainUtils.createProdutoLanche;
-import static br.fiap.projeto.pedido.util.JsonUtils.convertObjectToJsonString;
-import static br.fiap.projeto.pedido.util.JsonUtils.createComandaJsonString;
-import static br.fiap.projeto.pedido.util.JsonUtils.createPagamentoJsonString;
-import static br.fiap.projeto.pedido.util.JsonUtils.createProdutoJsonString;
-import static br.fiap.projeto.pedido.util.JsonUtils.stringJsonToMapStringObject;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static br.fiap.projeto.pedido.util.Constants.*;
+import static br.fiap.projeto.pedido.util.DomainUtils.*;
+import static br.fiap.projeto.pedido.util.JsonUtils.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @SpringBootTest
 @Slf4j
@@ -126,7 +102,14 @@ public class PedidoIntegrationTest {
                         .withBody(jsonValue)));
     }
 
+    @Mock
+    private IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT;
 
+    @Mock
+    private IPagamentoConfirmadoQueueIN pagamentoConfirmadoQueueIN;
+
+    @Mock
+    private IPagamentoCanceladoQueueIN pagamentoCanceladoQueueIN;
 
     ////////////////////////////////////////////////////////
     // INICIO DOS TESTES
@@ -446,5 +429,47 @@ public class PedidoIntegrationTest {
         testeCriarComCliente();
         MvcResult result = genericGet(ENDPOINT_PEDIDO_BASE + ENDPOINT_BUSCA_PEDIDOS);
         System.out.println(result.getResponse().getContentAsString());
+    }
+
+    @Test
+    void testEnviaPedidoParaPagamentoQueue() throws Exception {
+        testeAdicionarProduto();
+        pedidoQueueAdapterGatewayOUT.publish("Teste mensagem");
+        Mockito.verify(pedidoQueueAdapterGatewayOUT, Mockito.times(1)).publish(ArgumentMatchers.anyString());
+    }
+
+    @Test
+    public void testRecebePagamentoCanceladoQueue() throws Exception {
+        testeAdicionarProduto();
+
+        IJsonConverter customConverter = Mockito.mock(JsonConverter.class);
+        Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
+
+        Pagamento pagamento = createPagamentoCancelado();
+        String message = customConverter.convertObjectToJsonString(pagamento);
+        pagamentoCanceladoQueueIN.receive(message);
+
+        try {
+            Mockito.verify(pagamentoCanceladoQueueIN, Mockito.times(1)).receive(ArgumentMatchers.anyString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testRecebePagamentoConfirmadoQueue() throws Exception {
+        testeAdicionarProduto();
+
+        IJsonConverter customConverter = Mockito.mock(JsonConverter.class);
+        Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
+
+        Pagamento pagamento = createPagamentoPago();
+        pagamentoConfirmadoQueueIN.receive(customConverter.convertObjectToJsonString(pagamento));
+
+        try {
+            Mockito.verify(pagamentoConfirmadoQueueIN, Mockito.times(1)).receive(ArgumentMatchers.anyString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
