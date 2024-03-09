@@ -5,8 +5,6 @@ import br.fiap.projeto.pedido.entity.enums.StatusPedido;
 import br.fiap.projeto.pedido.usecase.enums.MensagemErro;
 import br.fiap.projeto.pedido.usecase.exception.InvalidStatusException;
 import br.fiap.projeto.pedido.usecase.exception.NoItensException;
-import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
-import br.fiap.projeto.pedido.usecase.port.adaptergateway.IPedidoPagamentoIntegrationAdapterGateway;
 import br.fiap.projeto.pedido.usecase.port.adaptergateway.IPedidoRepositoryAdapterGateway;
 import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.usecase.port.usecase.IPedidoWorkFlowUseCase;
@@ -15,14 +13,11 @@ import java.util.UUID;
 
 public class PedidoWorkFlowUseCase extends AbstractPedidoUseCase  implements IPedidoWorkFlowUseCase {
     private final IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT;
-    private final IJsonConverter jsonConverter;
 
     public PedidoWorkFlowUseCase(IPedidoRepositoryAdapterGateway IPedidoRepositoryAdapterGateway,
-                                 IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT,
-                                 IJsonConverter jsonConverter) {
+                                 IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT) {
         super(IPedidoRepositoryAdapterGateway);
         this.pedidoQueueAdapterGatewayOUT = pedidoQueueAdapterGatewayOUT;
-        this.jsonConverter = jsonConverter;
     }
     @Override
     public Pedido receber(UUID codigo) throws Exception {
@@ -93,6 +88,6 @@ public class PedidoWorkFlowUseCase extends AbstractPedidoUseCase  implements IPe
         if(!pedido.getStatus().equals(StatusPedido.RECEBIDO)){
             throw new Exception(MensagemErro.INVALID_STATUS.getMessage());
         }
-        pedidoQueueAdapterGatewayOUT.publish(jsonConverter.convertObjectToJsonString(pedido));
+        pedidoQueueAdapterGatewayOUT.publish(pedido);
     }
 }

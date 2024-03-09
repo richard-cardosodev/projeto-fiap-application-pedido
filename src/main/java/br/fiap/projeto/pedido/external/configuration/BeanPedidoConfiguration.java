@@ -8,8 +8,8 @@ import br.fiap.projeto.pedido.external.integration.PedidoComandaIntegration;
 import br.fiap.projeto.pedido.external.integration.PedidoPagamentoIntegration;
 import br.fiap.projeto.pedido.external.integration.PedidoProdutoIntegration;
 import br.fiap.projeto.pedido.external.repository.postgres.SpringPedidoRepository;
+import br.fiap.projeto.pedido.external.utils.JsonConverter;
 import br.fiap.projeto.pedido.usecase.*;
-import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
 import br.fiap.projeto.pedido.usecase.port.adaptergateway.*;
 import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.usecase.port.usecase.*;
@@ -33,11 +33,9 @@ public class BeanPedidoConfiguration {
     }
     @Bean
     IPedidoWorkFlowUseCase pedidoWorkFlowUseCase(IPedidoRepositoryAdapterGateway pedidoRepositoryAdapterGateway,
-                                                 IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT,
-                                                 IJsonConverter jsonConverter){
+                                                 IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT){
         return new PedidoWorkFlowUseCase(pedidoRepositoryAdapterGateway,
-                pedidoQueueAdapterGatewayOUT,
-                jsonConverter);
+                pedidoQueueAdapterGatewayOUT);
     }
     @Bean
     IPedidoComandaIntegrationUseCase pedidoComandaIntegrationUseCase(IPedidoComandaIntegrationAdapterGateway pedidoComandaIntegrationAdapterGateway,
@@ -96,7 +94,7 @@ public class BeanPedidoConfiguration {
         return new PedidoPagamentoIntegrationAdapterGateway(pagamentoIntegration);
     }
     @Bean
-    IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT(RabbitTemplate rabbitTemplate) {
-        return new PedidoQueueAdapterGatewayOUT(rabbitTemplate);
+    IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT(RabbitTemplate rabbitTemplate, JsonConverter jsonConverter) {
+        return new PedidoQueueAdapterGatewayOUT(rabbitTemplate, jsonConverter);
     }
 }
