@@ -8,6 +8,7 @@ import br.fiap.projeto.pedido.external.integration.port.Produto;
 import br.fiap.projeto.pedido.external.messaging.PagamentoCanceladoQueueIN;
 import br.fiap.projeto.pedido.external.messaging.PagamentoConfirmadoQueueIN;
 import br.fiap.projeto.pedido.external.utils.JsonConverter;
+import br.fiap.projeto.pedido.usecase.exception.JsonProcessingException;
 import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
 import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.util.DomainUtils;
@@ -39,6 +40,7 @@ import static br.fiap.projeto.pedido.util.Constants.*;
 import static br.fiap.projeto.pedido.util.DomainUtils.*;
 import static br.fiap.projeto.pedido.util.JsonUtils.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Slf4j
@@ -461,12 +463,8 @@ public class PedidoIntegrationTest {
         Mockito.when(jsonConverter.stringJsonToMapStringObject(Mockito.anyString())).thenReturn(mapMockado);
         Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
 
-        JsonConverter JC = new JsonConverter();
-
         String message = customConverter.convertObjectToJsonString(pagamento);
         pagamentoCanceladoQueueIN.receive(message);
-
-        JC.stringJsonToMapStringObject(message);
     }
 
     @Test
@@ -485,5 +483,28 @@ public class PedidoIntegrationTest {
         Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
 
         pagamentoConfirmadoQueueIN.receive(customConverter.convertObjectToJsonString(pagamento));
+    }
+
+    @Test
+    public void jsonConverterTest() throws Exception {
+        JsonConverter JC = new JsonConverter();
+
+        Map<String,Object> mapComum = new HashMap<>();
+        mapComum.put("codigoPedido", "1");
+        mapComum.put("status", "APROVADO");
+
+        String jsonString = JC.convertObjectToJsonString(mapComum);
+
+        Map<String,Object> mapConvertido = JC.stringJsonToMapStringObject(jsonString);
+
+        System.out.println(mapComum.equals(mapConvertido));
+    }
+    @Test
+    public void jsonConverterTestException() throws Exception {
+        JsonConverter JC = new JsonConverter();
+
+        assertThrows(JsonProcessingException.class, () -> {
+            Map<String, Object> mapConvertido = JC.stringJsonToMapStringObject("STRING QUE CLARAMENTE NÃO É UM JSON!!!!");
+        });
     }
 }
