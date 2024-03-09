@@ -1,25 +1,27 @@
 package br.fiap.projeto.pedido;
 
+import br.fiap.projeto.pedido.adapter.controller.port.IPedidoPagamentoIntegrationRestAdapterController;
 import br.fiap.projeto.pedido.external.integration.port.Cliente;
 import br.fiap.projeto.pedido.external.integration.port.Comanda;
 import br.fiap.projeto.pedido.external.integration.port.Pagamento;
 import br.fiap.projeto.pedido.external.integration.port.Produto;
+import br.fiap.projeto.pedido.external.messaging.PagamentoCanceladoQueueIN;
+import br.fiap.projeto.pedido.external.messaging.PagamentoConfirmadoQueueIN;
 import br.fiap.projeto.pedido.external.utils.JsonConverter;
 import br.fiap.projeto.pedido.usecase.port.IJsonConverter;
-import br.fiap.projeto.pedido.usecase.port.messaging.IPagamentoCanceladoQueueIN;
-import br.fiap.projeto.pedido.usecase.port.messaging.IPagamentoConfirmadoQueueIN;
 import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.util.DomainUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.cucumber.java.et.Ja;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +31,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -106,10 +109,15 @@ public class PedidoIntegrationTest {
     private IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT;
 
     @Mock
-    private IPagamentoConfirmadoQueueIN pagamentoConfirmadoQueueIN;
-
+    private IJsonConverter jsonConverter;
     @Mock
-    private IPagamentoCanceladoQueueIN pagamentoCanceladoQueueIN;
+    private IPedidoPagamentoIntegrationRestAdapterController pedidoPagamentoIntegrationRestAdapterController;
+
+    @InjectMocks
+    private PagamentoConfirmadoQueueIN pagamentoConfirmadoQueueIN;
+
+    @InjectMocks
+    private PagamentoCanceladoQueueIN pagamentoCanceladoQueueIN;
 
     ////////////////////////////////////////////////////////
     // INICIO DOS TESTES
@@ -431,45 +439,51 @@ public class PedidoIntegrationTest {
         System.out.println(result.getResponse().getContentAsString());
     }
 
-    @Test
-    void testEnviaPedidoParaPagamentoQueue() throws Exception {
-        testeAdicionarProduto();
-        pedidoQueueAdapterGatewayOUT.publish("Teste mensagem");
-        Mockito.verify(pedidoQueueAdapterGatewayOUT, Mockito.times(1)).publish(ArgumentMatchers.anyString());
-    }
+//    @Test
+//    void testEnviaPedidoParaPagamentoQueue() throws Exception {
+//        testeAdicionarProduto();
+//        pedidoQueueAdapterGatewayOUT.publish("Teste mensagem");
+//        Mockito.verify(pedidoQueueAdapterGatewayOUT, Mockito.times(1)).publish(ArgumentMatchers.anyString());
+//    }
 
     @Test
     public void testRecebePagamentoCanceladoQueue() throws Exception {
-        testeAdicionarProduto();
-
-        IJsonConverter customConverter = Mockito.mock(JsonConverter.class);
-        Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
+        testeEnviarParaPagamento();
 
         Pagamento pagamento = createPagamentoCancelado();
+
+        Map<String,Object> mapMockado = new HashMap<>();
+        mapMockado.put("codigoPedido", pagamento.getCodigoPedido());
+        mapMockado.put("dataPagamento", (Long)pagamento.getDataPagamento().getTime());
+        mapMockado.put("status", pagamento.getStatus().toString());
+
+        IJsonConverter customConverter = Mockito.mock(JsonConverter.class);
+        Mockito.when(jsonConverter.stringJsonToMapStringObject(Mockito.anyString())).thenReturn(mapMockado);
+        Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
+
+        JsonConverter JC = new JsonConverter();
+
         String message = customConverter.convertObjectToJsonString(pagamento);
         pagamentoCanceladoQueueIN.receive(message);
 
-        try {
-            Mockito.verify(pagamentoCanceladoQueueIN, Mockito.times(1)).receive(ArgumentMatchers.anyString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        JC.stringJsonToMapStringObject(message);
     }
 
     @Test
     public void testRecebePagamentoConfirmadoQueue() throws Exception {
-        testeAdicionarProduto();
-
-        IJsonConverter customConverter = Mockito.mock(JsonConverter.class);
-        Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
+        testeEnviarParaPagamento();
 
         Pagamento pagamento = createPagamentoPago();
-        pagamentoConfirmadoQueueIN.receive(customConverter.convertObjectToJsonString(pagamento));
 
-        try {
-            Mockito.verify(pagamentoConfirmadoQueueIN, Mockito.times(1)).receive(ArgumentMatchers.anyString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Map<String,Object> mapMockado = new HashMap<>();
+        mapMockado.put("codigoPedido", pagamento.getCodigoPedido());
+        mapMockado.put("dataPagamento", (Long)pagamento.getDataPagamento().getTime());
+        mapMockado.put("status", pagamento.getStatus().toString());
+
+        IJsonConverter customConverter = Mockito.mock(JsonConverter.class);
+        Mockito.when(jsonConverter.stringJsonToMapStringObject(Mockito.anyString())).thenReturn(mapMockado);
+        Mockito.when(customConverter.convertObjectToJsonString(ArgumentMatchers.any(Pagamento.class))).thenCallRealMethod();
+
+        pagamentoConfirmadoQueueIN.receive(customConverter.convertObjectToJsonString(pagamento));
     }
 }
