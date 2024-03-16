@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class PedidoWorkFlowApiController {
         this.pedidoWorkFlowRestAdapterController = pedidoWorkFlowRestAdapterController;
     }
 
+    @Transactional
     @PutMapping("/{codigo}/pagar")
     @ResponseBody
     @ApiOperation(value = "Pagar Pedido", notes="Esse endpoint Altera o status do pedido para Recebido para que seja enviado para pagamento.")

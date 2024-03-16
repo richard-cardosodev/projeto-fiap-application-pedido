@@ -5,18 +5,19 @@ import br.fiap.projeto.pedido.entity.enums.StatusPedido;
 import br.fiap.projeto.pedido.usecase.enums.MensagemErro;
 import br.fiap.projeto.pedido.usecase.exception.InvalidStatusException;
 import br.fiap.projeto.pedido.usecase.exception.NoItensException;
-import br.fiap.projeto.pedido.usecase.port.adaptergateway.IPedidoPagamentoIntegrationAdapterGateway;
 import br.fiap.projeto.pedido.usecase.port.adaptergateway.IPedidoRepositoryAdapterGateway;
+import br.fiap.projeto.pedido.usecase.port.messaging.IPedidoQueueAdapterGatewayOUT;
 import br.fiap.projeto.pedido.usecase.port.usecase.IPedidoWorkFlowUseCase;
 
 import java.util.UUID;
 
 public class PedidoWorkFlowUseCase extends AbstractPedidoUseCase  implements IPedidoWorkFlowUseCase {
-    private final IPedidoPagamentoIntegrationAdapterGateway pedidoPagamentoIntegrationAdapterGateway;
+    private final IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT;
+
     public PedidoWorkFlowUseCase(IPedidoRepositoryAdapterGateway IPedidoRepositoryAdapterGateway,
-                                 IPedidoPagamentoIntegrationAdapterGateway pedidoPagamentoIntegrationAdapterGateway) {
+                                 IPedidoQueueAdapterGatewayOUT pedidoQueueAdapterGatewayOUT) {
         super(IPedidoRepositoryAdapterGateway);
-        this.pedidoPagamentoIntegrationAdapterGateway = pedidoPagamentoIntegrationAdapterGateway;
+        this.pedidoQueueAdapterGatewayOUT = pedidoQueueAdapterGatewayOUT;
     }
     @Override
     public Pedido receber(UUID codigo) throws Exception {
@@ -87,6 +88,6 @@ public class PedidoWorkFlowUseCase extends AbstractPedidoUseCase  implements IPe
         if(!pedido.getStatus().equals(StatusPedido.RECEBIDO)){
             throw new Exception(MensagemErro.INVALID_STATUS.getMessage());
         }
-        pedidoPagamentoIntegrationAdapterGateway.iniciaPagamento(pedido.getCodigo(), pedido.getValorTotal());
+        pedidoQueueAdapterGatewayOUT.publish(pedido);
     }
 }
